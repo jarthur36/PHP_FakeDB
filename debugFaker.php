@@ -37,7 +37,8 @@ class DebugFaker extends FakerBase {
     }
 
     protected function generateField($type, $field) : array {
-        $id = rand(0, 100);
+        $id = rand(1, 1000);
+
         if($type!="user"){
             return array(
                 "id"        => $id,
@@ -58,7 +59,7 @@ class DebugFaker extends FakerBase {
 
 $fakedb = new DebugFaker();
 
-for ($i=0; $i<150; $i++) {
+for ($i=0; $i<1000; $i++) {
     $fakedb->generateRecord("merchant");
 }
 error_log("Complete: ");
@@ -70,8 +71,9 @@ $tree = array();
 foreach ($fakedb->store['merchant'] as $rec) {
     $tree[$rec->data['resellerName']] = !empty($tree[$rec->data['resellerName']]) ? $tree[$rec->data['resellerName']] : array();
     $tree[$rec->data['resellerName']][$rec->data['customerName']][] = $rec->data['name'];
+
 }
 
 //error_log(preg_replace(["/\n\s*\n/","/ '/"], ["\n", "->"], preg_replace(array("/\d+ =>/", "/array \(/", "/\),/", "/',/", "/' =>/"), "", var_export($tree,true))));
-//error_log(var_export($tree,true));
+//error_log(var_export($fakedb->store,true));
 ?>

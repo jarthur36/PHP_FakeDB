@@ -99,9 +99,12 @@ class Record {
         return array_search($remoteName, self::$schemas[$local]);
     }
 
-    public function __construct($_type){
+    public function __construct($_type, $initData = array()){
         $this->type = $_type;
         $this->schema = (isset(self::$schemas[$_type]) ? self::$schemas[$_type] : array());
+        if(!empty($initData)){
+            $data = $initData;
+        }
     }
 
     /**

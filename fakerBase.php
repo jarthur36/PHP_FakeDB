@@ -93,7 +93,9 @@ abstract class FakerBase {
 
         $foreign = array();
         $fields = array_slice($schema,0);
+        $count = 0;
         foreach ($fields as $k=>$v) {
+            $count++;
             $tmp = explode('.', $v);
             $ttype = $tmp[0];
 
@@ -104,8 +106,15 @@ abstract class FakerBase {
                 $res = $this->generateField($type, $k);
                 if (!empty($res)) { // this might want changing if empty is being deliberately generated
                     // Merge in any resulting keys
+                    //$rec->data[$k] = $res;
                     $rec->data = $rec->data + $res;
-                    $fields = array_diff_key($fields, $res);
+                    foreach($res as $k1=>$v1) {
+                        if (isset($fields[$k1])) {
+                            unset($fields[$k1]);
+                        }
+                    }
+                    //$fields1 = array_diff_key($fields, $res);
+                    unset($res);
                 } else {
                     error_log("No generator defined for field {$v}");
                 }
@@ -118,22 +127,26 @@ abstract class FakerBase {
         }
 
         // Iterate through any parent objects that need creating and create them in order
+        $count = 0;
+        $error_mode = false;
         while (!empty($foreign)) {
+            $count++;
             $sorted = array_values(array_intersect(Record::$top_order, array_values($foreign)));
             if (!empty($sorted)) {
                 $ttype = $sorted[0];
                 $count = $this->countObjects($ttype);
                 if( $count==0 || (rand(0,10) >= $this->branching_factor)) {
+
                     $res = $this->generateRecord($ttype);
                 } else {
                     $res = $this->getRandomRecord($ttype);
                 }
                 $rec->merge_data($res,false);
+
             } else {
                 error_log("Some fields could not be generated as no path was found");
                 die();
             }
-
 
             foreach ($foreign as $k=>$v){
                 if(!empty($rec->data[$k])){
