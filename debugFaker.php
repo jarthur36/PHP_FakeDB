@@ -2,7 +2,6 @@
 require_once("record.php");
 require_once("fakerBase.php");
 
-ini_set("memory_limit","-1");
 
 class DebugFaker extends FakerBase {
 

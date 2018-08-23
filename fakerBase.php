@@ -19,7 +19,7 @@ abstract class FakerBase {
      * 
      * A number between 0 and 10 to determine branchy the database is on average
      */
-    protected $branching_factor = 3;
+    protected $branching_factor = 6;
 
 
     /**
@@ -93,9 +93,8 @@ abstract class FakerBase {
 
         $foreign = array();
         $fields = array_slice($schema,0);
-        $count = 0;
+
         foreach ($fields as $k=>$v) {
-            $count++;
             $tmp = explode('.', $v);
             $ttype = $tmp[0];
 
@@ -127,16 +126,13 @@ abstract class FakerBase {
         }
 
         // Iterate through any parent objects that need creating and create them in order
-        $count = 0;
-        $error_mode = false;
+ 
         while (!empty($foreign)) {
-            $count++;
             $sorted = array_values(array_intersect(Record::$top_order, array_values($foreign)));
             if (!empty($sorted)) {
                 $ttype = $sorted[0];
                 $count = $this->countObjects($ttype);
                 if( $count==0 || (rand(0,10) >= $this->branching_factor)) {
-
                     $res = $this->generateRecord($ttype);
                 } else {
                     $res = $this->getRandomRecord($ttype);
