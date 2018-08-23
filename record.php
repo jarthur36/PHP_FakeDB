@@ -77,6 +77,9 @@ class Record {
      * Topological Ordering of record inheritance, assuming records form 
      * a directed acyclic graph of inclusion. 
      * 
+     * If a record contaians fields from another record then the former must be 
+     * placed before the latter in the list
+     * 
      * TODO: Calculate this dynamically from schema using topological sort
      *
      * @var array
@@ -84,6 +87,17 @@ class Record {
     public static $top_order = ["user","merchant","customer","reseller"];
 
 
+
+    /**
+     * Takes a remote (dotted) name and a record type and finds
+     * the local key that it corresponds to.
+     * 
+     * @param   string  $remoteName
+     * @param   string  $local  The resource type you want the key for
+     */
+    public static function mapToLocal($remoteName,$local){
+        return array_search($remoteName, self::$schemas[$local]);
+    }
 
     public function __construct($_type){
         $this->type = $_type;

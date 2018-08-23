@@ -14,13 +14,35 @@ ini_set('display_errors', 1);
  */
 abstract class FakerBase {
 
-
+    /**
+     * Branching Factor
+     * 
+     * A number between 0 and 10 to determine branchy the database is on average
+     */
     protected $branching_factor = 3;
 
 
-    abstract protected function generateField($type,$field) : String;
+    /**
+     * Generate the values for a field
+     * 
+     * This should be overriden in implementation in order to
+     * generate the desired field and any related dependant fields.
+     */
+    abstract protected function generateField($type,$field) : array;
 
 
+
+    /**
+     * Return a random record
+     * 
+     * Logic can be added here to influence the distrubition of children
+     * in the resulting tree
+     * 
+     * @precond A record exists
+     * 
+     * @param   string  $type   The type of record to fetch
+     * @return  Record
+     */
     abstract protected function getRandomRecord($type) : Record;
 
     /**
@@ -57,13 +79,21 @@ abstract class FakerBase {
 
 
 
-
+    /**
+     * Generate a record of a given $type
+     * 
+     * Recursively calls itself to generate/fetch parents if needed
+     * 
+     * @param   string  $type   The type of record to generate
+     * 
+     */
     public function generateRecord($type) : Record {
         $rec = new Record($type);
         $schema = $rec->schema;
 
         $foreign = array();
-        foreach ($schema as $k=>$v) {
+        $fields = array_slice($schema,0);
+        foreach ($fields as $k=>$v) {
             $tmp = explode('.', $v);
             $ttype = $tmp[0];
 
@@ -73,7 +103,9 @@ abstract class FakerBase {
                 // We are the originator so we can safely generate
                 $res = $this->generateField($type, $k);
                 if (!empty($res)) { // this might want changing if empty is being deliberately generated
-                    $rec->data[$k] = $res;
+                    // Merge in any resulting keys
+                    $rec->data = $rec->data + $res;
+                    $fields = array_diff_key($fields, $res);
                 } else {
                     error_log("No generator defined for field {$v}");
                 }
